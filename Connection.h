@@ -9,16 +9,23 @@
 #include <netinet/in.h>
 #include <vector>
 #include <regex>
+#include "libcurlHandler.cpp"
 
 using namespace std;
 class Server;
 class Connection {
+    int id;
     int sock;
     thread connection_thread;
     Server *server;
+    string exec(string command);
+    string getTime(string timezone);
+
 public:
     Connection(int sock, Server *server);
     void conection_handler();
+    int getConnectionID();
+
 };
 
 

@@ -14,10 +14,10 @@ void Server::start() {
     cout << "Начинаю" << endl;
     while(sock)
     {
-        cout << "Готовлюсь принимать подключения" << endl;
         sock = accept(this->sock_listener, NULL, NULL);
-        cout << "Принял подключение" << endl;
-        this->connections.push_back(new Connection(sock, this));
+        Connection *connection = new Connection(sock, this);
+        this->connections.push_back(connection);
+        cout << "Принял подключение, id = " << connection->getConnectionID() << "; sock = " << sock << endl;
     }
 }
 
@@ -26,4 +26,8 @@ void Server::removeConnection(Connection *connection) {
             remove(connections.begin(), connections.end(), connection),
             connections.end()
             );
+}
+
+int Server::getConnectionsCount() {
+    return connections.size();
 }

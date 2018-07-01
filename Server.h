@@ -24,7 +24,8 @@ public:
     explicit Server(int port);
     void start();
     void removeConnection(Connection *connection);
+    int getConnectionsCount();
 };
 
 
-#endif //SANDBOX_SERVER_H
+#endif
