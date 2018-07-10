@@ -6,7 +6,11 @@ Server::Server(int port) {
     sock_addr.sin_port = htons(port);
     sock_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     sock_listener = socket(AF_INET, SOCK_STREAM, 0);
-    bind(this->sock_listener, (struct sockaddr *) &sock_addr, sizeof(sock_addr));
+    if(bind(this->sock_listener, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) < 0)
+    {
+        cout << "Can't bind socket" << endl;
+        exit(1);
+    }
 }
 
 void Server::start() {

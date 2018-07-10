@@ -9,9 +9,12 @@
 #include <netinet/in.h>
 #include <vector>
 #include <regex>
-#include "libcurlHandler.cpp"
+#include <string.h>
 
 using namespace std;
+
+const int EXCEPTION_INCORRECT_TIMEZONE = -1;
+
 class Server;
 class Connection {
     int id;
@@ -20,13 +23,12 @@ class Connection {
     Server *server;
     string exec(string command);
     string getTime(string timezone);
-
+    string parseTimezone(string html);
 public:
     Connection(int sock, Server *server);
     void conection_handler();
     int getConnectionID();
 
 };
-
 
 #endif //SANDBOX_CONNECTION_H

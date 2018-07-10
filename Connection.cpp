@@ -1,5 +1,6 @@
 #include "Connection.h"
 #include "Server.h"
+#include "libcurlHandler.cpp"
 
 void Connection::conection_handler() {
     char buf[128];
@@ -20,16 +21,18 @@ void Connection::conection_handler() {
     this->server->removeConnection(this);
     cout << "Подключение " << this->id << " закрыто" << endl;
 }
+
 Connection::Connection(int sock, Server *server) {
-    this->id = server->getConnectionsCount() + 1;
+    id = server->getConnectionsCount() + 1;
     this->sock = sock;
-    connection_thread = thread([this] { this->conection_handler(); });
+    connection_thread = thread([this] { conection_handler(); });
     this->server = server;
     connection_thread.detach();
 }
 int Connection::getConnectionID() {
-    return this->id;
+    return id;
 }
+
 string Connection::exec(string command) {
     char buffer[128];
     string result = "";
@@ -39,13 +42,40 @@ string Connection::exec(string command) {
         if (fgets(buffer, 128, stream) != NULL)
             result += buffer;
     }
-    pclose(stream); // Закрываем поток чтения
+    pclose(stream);
     return result;
 }
 
 string Connection::getTime(string tz) {
-    string request_str = libcurlHandler::GET("https://time.is/en/" + timezone);
-
-    string full_timezone = tz;
-    return exec("LANG=en TZ=\"" + full_timezone + "\" date" );
+    try {
+        string url = "https://time.is/en/" + tz;
+        string html_content = LibCurlHandler.GET(url);
+        string full_timezone = parseTimezone(html_content);
+        cout << full_timezone << endl;
+        return exec("LANG=en TZ=\"" + full_timezone + "\" date");
+    }
+    catch(int e)
+    {
+        return "Incorrect timezone\n";
+    }
 }
+
+string Connection::parseTimezone(string html) {
+
+    const regex re("zone_id=\"(.*)\"");
+    auto match = cmatch{};
+    regex_search(html.c_str(), match, re);
+    string zoneinfo = match[0].str();
+
+    if(zoneinfo != "") {
+        string timezone = "";
+        for (int i = zoneinfo.find("\"") + 1; i < zoneinfo.find_last_of('\"'); i++) {
+            timezone += zoneinfo[i];
+        }
+        return timezone;
+    } else
+    {
+        throw EXCEPTION_INCORRECT_TIMEZONE;
+    }
+}
+
